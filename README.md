@@ -59,13 +59,14 @@ npm --version
 3. 绑定到 Worker，变量名必须为 `SENTINEL_KV`
 
 #### 步骤 3: 设置环境变量
-```env
-PASSWORD=your_admin_password 
-TELEGRAM_TOKEN=your_telegram_bot_token 
-CHAT_ID=your_telegram_chat_id 
-DISCORD_WEBHOOK=your_discord_webhook_url 
-GENERIC_WEBHOOK=your_generic_webhook_url 
-```
+
+| 变量名 / Variable | 描述 / Description | 必需 / Required | 默认值 / Default |
+|------------------|-------------------|----------------|------------------|
+| `PASSWORD` | 管理面板的操作密码 | ✅ | `123456` |
+| `TELEGRAM_TOKEN` | Telegram Bot Token（从 @BotFather 获取） | ❌ | - |
+| `CHAT_ID` | 接收通知的 Telegram Chat ID | ❌ | - |
+| `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
+| `GENERIC_WEBHOOK` | 通用 Webhook URL（支持飞书、钉钉等） | ❌ | - |
 
 #### 步骤 4: 配置定时任务
 - 在 Worker 的 **Triggers** 选项卡中
@@ -105,13 +106,7 @@ GENERIC_WEBHOOK=your_generic_webhook_url
 
 ### 环境变量 / Environment Variables
 
-| 变量名 / Variable | 描述 / Description | 必需 / Required | 默认值 / Default |
-|------------------|-------------------|----------------|------------------|
-| `PASSWORD` | 管理面板的操作密码 | ✅ | `123456` |
-| `TELEGRAM_TOKEN` | Telegram Bot Token（从 @BotFather 获取） | ❌ | - |
-| `CHAT_ID` | 接收通知的 Telegram Chat ID | ❌ | - |
-| `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
-| `GENERIC_WEBHOOK` | 通用 Webhook URL（支持飞书、钉钉等） | ❌ | - |
+环境变量已在部署步骤中详细说明，请参考 **步骤 3: 设置环境变量**。
 
 ### 通知配置 / Notification Configuration
 
@@ -245,5 +240,5 @@ A: 清除浏览器缓存或重新设置密码。
 
 ---
 
-*最后更新: 2024年12月*  
-*Last Updated: December 2024*
+*最后更新: 2026年1月*  
+*Last Updated: January 2026*
