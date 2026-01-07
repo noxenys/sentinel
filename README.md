@@ -26,7 +26,7 @@
 
 ## 🚀 快速部署 / Quick Deployment
 
-1.  **创建 Worker / Create a Worker**: 在 Cloudflare Dashboard 创建一个新的 Worker，并将本项目中的 `index.js` 代码复制进去。
+1.  **创建 Worker / Create a Worker**: 在 Cloudflare Dashboard 创建一个新的 Worker，并将本项目中的 `worker.js` 代码复制进去。
 2.  **绑定 KV / Bind KV Namespace**: 创建一个名为 `SENTINEL_KV` 的 KV Namespace，并将其绑定到您的 Worker。在 Worker 设置中，**Variable name (变量名)** 必须设置为 `SENTINEL_KV`。
 3.  **设置环境变量 / Set Environment Variables**:
     *   `PASSWORD`: 管理面板的操作密码（默认 `123456`）。
