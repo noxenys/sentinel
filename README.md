@@ -12,6 +12,8 @@
 
 - 🚀 **极简审美 / Clean & Minimalist UI**: 采用现代化的深色模式 UI，信息展示清晰直观。
 - 🎨 **现代化模态框 / Modern Custom Modals**: 告别原生弹窗，删除操作采用与 UI 风格统一的磨砂玻璃质感模态框，交互更优雅。
+- ⚡ **高频实时动感监控 / High-Frequency Dynamic Monitoring**: 响应时间每 3-5 秒高频更新，伴随视觉闪烁，增强实时感。
+- 🔔 **多平台告警 / Multi-Platform Alerts**: 支持 Telegram、Discord 和通用 Webhook (飞书/钉钉) 等多渠道告警，确保通知无遗漏。
 - ⏰ **实时时钟 / Real-time Clock**: Dashboard 顶部显示本地时区实时时间，增强监控感。
 - 📊 **实时状态与延迟 / Real-time Status & Latency**: 实时显示网站在线状态和响应延迟（毫秒）。
 - 📈 **历史状态条 / Uptime History Bar**: 每个监控项下方展示最近 12 次检测的历史状态。
@@ -68,4 +70,4 @@
 
 ---
 
-**Powered by Noxen YS/Manus AI**
+**Powered by Noxen YS & Manus AI**

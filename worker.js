@@ -1,7 +1,17 @@
 /**
- * Sentinel v3.3 - Modern UI Edition
+ * Sentinel v3.8 - High-Frequency Dynamic Edition
+ * Powered by Noxen YS & Manus AI
  * 
- * Fixed: Custom Modal for Delete, UI Consistency
+ * Features: 
+ * - High-Frequency Dynamic Monitoring (3-5s interval)
+ * - In-place Editing (Directly edit in the list)
+ * - Multi-platform Alerts (TG, Discord, Webhook)
+ * - Alert Throttling (1h cooling)
+ * - Uptime History Bar (50 records)
+ * - Real-time Latency Tracking with Visual Feedback
+ * - Smart Categorization & Accordion UI
+ * - Modern Custom Modals
+ * - Bilingual UI & Local Clock
  */
 
 const DEFAULT_URLS = []; 
@@ -91,8 +101,10 @@ const HTML_PAGE = `
     .status-row { display: flex; align-items: center; gap: 12px; }
     .status-badge { font-size: 0.65rem; padding: 3px 10px; border-radius: 6px; font-weight: 700; text-transform: uppercase; }
     .status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
     .status-offline { background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
-    .latency { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; }
+    .latency { font-size: 0.75rem; color: #38bdf8; font-family: monospace; transition: all 0.3s ease; font-weight: 600; }
+    .latency-update { color: #fff; text-shadow: 0 0 8px var(--primary); }
 
     .history-bar { display: flex; gap: 4px; margin-top: 14px; }
     .history-dot { width: 100%; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.05); }
@@ -124,6 +136,7 @@ const HTML_PAGE = `
       color: white;
       padding: 14px;
       font-family: inherit;
+      width: 100%;
     }
     
     .toast {
@@ -154,6 +167,7 @@ const HTML_PAGE = `
     <header>
       <h1>Sentinel</h1>
       <p class="subtitle">智能在线哨兵 · 生产级监控</p>
+      <p style="font-size: 0.7rem; color: var(--text-muted); margin-top: 5px; opacity: 0.6;">Powered by Noxen YS & Manus AI</p>
       <div id="liveClock" style="margin-top: 15px; font-family: monospace; color: var(--primary); font-weight: 600; font-size: 1.1rem; letter-spacing: 1px;"></div>
     </header>
 
@@ -173,7 +187,7 @@ const HTML_PAGE = `
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; gap:12px;">
-          <button class="btn" onclick="addUrls()">批量添加 / Add</button>
+          <button class="btn" id="addBtn" onclick="addUrls()">批量添加 / Add</button>
           <button class="btn" style="background:#475569" onclick="exportConfig()">导出 / Export</button>
         </div>
         <button class="btn btn-danger" onclick="logout()">退出 / Logout</button>
@@ -271,7 +285,7 @@ const HTML_PAGE = `
             dotsHtml += '<div class="history-dot ' + dotClass + '"></div>';
           }
           itemsHtml += \`
-            <div class="monitor-item">
+            <div class="monitor-item" id="item-\${itemId}">
               <div class="item-main">
                 <div class="url-info">
                   <div class="url-text" title="\${item.url}">\${item.url}</div>
@@ -284,7 +298,10 @@ const HTML_PAGE = `
                   <button class="btn btn-icon" onclick="copyUrl('\${item.url}')" title="复制">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                   </button>
-                  <button class="btn btn-danger" onclick="deleteUrl('\${item.raw.replace(/'/g, "\\\\'")}')">删除</button>
+                  <button class="btn btn-icon" onclick="editUrl('\${item.raw.replace(/'/g, "\\\\\\\\'")}')" title="编辑">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
+                  <button class="btn btn-danger" onclick="deleteUrl('\${item.raw.replace(/'/g, "\\\\\\\\'")}')">删除</button>
                 </div>
               </div>
               <div class="history-bar">\${dotsHtml}</div>
@@ -312,32 +329,86 @@ const HTML_PAGE = `
 
     async function checkAll() {
       let online = 0, offline = 0;
-      for (const item of allUrls) {
+      const checkOne = async (item) => {
         let url = item;
         if (item.includes(':http')) url = item.substring(item.indexOf(':http') + 1);
-        const start = Date.now();
-        try {
-          const res = await fetch('/api/check?url=' + encodeURIComponent(url));
-          const data = await res.json();
-          const latency = Date.now() - start;
-          const itemId = getSafeId(item);
-          const badge = document.getElementById('status-' + itemId);
-          const latEl = document.getElementById('latency-' + itemId);
-          if (badge) {
-            if (data.ok) {
-              badge.innerText = 'ONLINE ' + data.status;
-              badge.className = 'status-badge status-online';
-              latEl.innerText = latency + 'ms';
-              online++;
-            } else {
-              badge.innerText = 'OFFLINE ' + (data.status || 'ERR');
-              badge.className = 'status-badge status-offline';
-              offline++;
+        const itemId = getSafeId(item);
+        const badge = document.getElementById('status-' + itemId);
+        const latEl = document.getElementById('latency-' + itemId);
+        
+        const runCheck = async () => {
+          const start = Date.now();
+          try {
+            const res = await fetch('/api/check?url=' + encodeURIComponent(url));
+            const data = await res.json();
+            const latency = Date.now() - start;
+            if (badge) {
+              if (data.ok) {
+                badge.innerText = 'ONLINE ' + data.status;
+                badge.className = 'status-badge status-online';
+                latEl.innerText = latency + 'ms';
+                latEl.classList.add('latency-update');
+                setTimeout(() => { latEl.classList.remove('latency-update'); }, 500);
+                online++;
+              } else {
+                badge.innerText = 'OFFLINE ' + (data.status || 'ERR');
+                badge.className = 'status-badge status-offline';
+                offline++;
+              }
             }
-          }
-        } catch (e) { offline++; }
-        document.getElementById('onlineCount').innerText = online;
-        document.getElementById('offlineCount').innerText = offline;
+          } catch (e) { offline++; }
+          document.getElementById('onlineCount').innerText = online;
+          document.getElementById('offlineCount').innerText = offline;
+        };
+
+        await runCheck();
+        // 开启高频循环检测，每 3-5 秒更新一次延迟，增强实时动感
+        setInterval(runCheck, 3000 + Math.random() * 2000);
+      };
+
+      allUrls.forEach(item => checkOne(item));
+    }
+
+    function editUrl(raw) {
+      const itemId = getSafeId(raw);
+      const itemEl = document.querySelector('#item-' + itemId);
+      let group = '默认分类', url = raw;
+      if (raw.includes(':http')) {
+        const idx = raw.indexOf(':http');
+        group = raw.substring(0, idx);
+        url = raw.substring(idx + 1);
+      }
+      
+      const originalHtml = itemEl.innerHTML;
+      itemEl.innerHTML = \`
+        <div class="edit-mode" style="display:flex; flex-direction:column; gap:10px; width:100%;">
+          <input type="text" id="edit-group-\${itemId}" class="input-field" style="padding:8px; font-size:0.85rem;" value="\${group === '默认分类' ? '' : group}" placeholder="分类名称">
+          <input type="text" id="edit-url-\${itemId}" class="input-field" style="padding:8px; font-size:0.85rem;" value="\${url}" placeholder="URL">
+          <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button class="btn" style="background:#475569; padding:5px 12px;" onclick="cancelEdit('\${itemId}', \\\`\${originalHtml.replace(/\\\`/g, '\\\\\\\\\\\`').replace(/\\$/g, '\\\\\\\\$')}\\\`)">取消</button>
+            <button class="btn" style="padding:5px 12px;" onclick="saveEdit('\${itemId}', '\${raw.replace(/'/g, "\\\\\\\\'")}')">保存</button>
+          </div>
+        </div>
+      \`;
+    }
+
+    function cancelEdit(itemId, originalHtml) {
+      document.querySelector('#item-' + itemId).innerHTML = originalHtml;
+    }
+
+    async function saveEdit(itemId, oldRaw) {
+      const newGroup = document.getElementById('edit-group-' + itemId).value.trim();
+      const newUrl = document.getElementById('edit-url-' + itemId).value.trim();
+      if (!newUrl) return showToast('URL 不能为空');
+      const newRaw = newGroup ? newGroup + ':' + newUrl : newUrl;
+      
+      const res = await apiFetch('/api/urls', { 
+        method: 'POST', 
+        body: JSON.stringify({ urls: [newRaw], replace: oldRaw }) 
+      });
+      if (res && res.ok) {
+        showToast('修改成功 / Updated');
+        setTimeout(() => location.reload(), 800);
       }
     }
 
@@ -348,6 +419,7 @@ const HTML_PAGE = `
       let urls = text.split('\\n').map(u => u.trim()).filter(u => u.includes('http'));
       if (urls.length === 0) return showToast('无效的 URL');
       if (group) urls = urls.map(u => group + ':' + u);
+      
       const res = await apiFetch('/api/urls', { method: 'POST', body: JSON.stringify({ urls: urls }) });
       if (res && res.ok) {
         showToast('添加成功 / Added');
@@ -431,7 +503,7 @@ const HTML_PAGE = `
   </script>
 </body>
 </html>
-`;
+\`;
 
 // --- Backend Logic ---
 
@@ -457,8 +529,11 @@ async function handleRequest(request) {
 
   if (method === 'POST' && url.pathname === '/api/urls') {
     if (!checkAuth(request)) return new Response('Unauthorized', { status: 401 });
-    const { urls: newUrls } = await request.json();
+    const { urls: newUrls, replace } = await request.json();
     let currentUrls = await getUrls();
+    if (replace) {
+      currentUrls = currentUrls.filter(u => u !== replace);
+    }
     const updatedUrls = [...new Set([...currentUrls, ...newUrls])];
     await saveUrls(updatedUrls);
     return new Response(JSON.stringify({ ok: true }));
@@ -476,10 +551,18 @@ async function handleRequest(request) {
   if (method === 'GET' && url.pathname === '/api/check') {
     const target = url.searchParams.get('url');
     try {
-      const res = await fetch(target, { method: 'GET', headers: { 'User-Agent': 'Sentinel/3.3' }, redirect: 'follow' });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(target, { 
+        method: 'GET', 
+        headers: { 'User-Agent': 'Sentinel/3.8' }, 
+        redirect: 'follow',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
       return new Response(JSON.stringify({ ok: res.status < 400, status: res.status }));
     } catch (e) {
-      return new Response(JSON.stringify({ ok: false, status: 0 }));
+      return new Response(JSON.stringify({ ok: false, status: e.message === 'Request aborted' ? 'TIMEOUT' : 'ERR' }));
     }
   }
 
@@ -519,7 +602,7 @@ async function handleScheduled() {
     let url = raw;
     if (raw.includes(':http')) url = raw.substring(raw.indexOf(':http') + 1);
     try {
-      const res = await fetch(url, { method: 'GET', headers: { 'User-Agent': 'Sentinel-Monitor/3.3' } });
+      const res = await fetch(url, { method: 'GET', headers: { 'User-Agent': 'Sentinel-Monitor/3.8' } });
       const ok = res.status < 400;
       results.push({ raw, url, ok, status: res.status });
       if (!history[raw]) history[raw] = [];
@@ -529,6 +612,7 @@ async function handleScheduled() {
       results.push({ raw, url, ok: false, status: 'Error' });
       if (!history[raw]) history[raw] = [];
       history[raw].push(0);
+      if (history[raw].length > 50) history[raw].shift();
     }
   }));
 
