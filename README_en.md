@@ -1,19 +1,34 @@
 # 🛡️ Sentinel - Website Monitoring & Alert System
 
-Sentinel is a modern website monitoring system built on Cloudflare Workers, providing real-time status monitoring, multi-platform alerts, and an elegant user interface.
+Sentinel v3.6 In-place Edition is a modern website monitoring system built on Cloudflare Workers, providing real-time status monitoring, multi-platform alerts, in-place editing capabilities, and an elegant user interface.
 
 ## ✨ Core Features
 
-- **Real-time Monitoring**: High-frequency detection of website availability and response time
-- **Multi-platform Alerts**: Support for Telegram, Discord, Lark, DingTalk, etc.
-- **Elegant Interface**: Modern design with responsive layout
-- **Alert Throttling**: Intelligent anti-spam to avoid duplicate notifications
-- **Historical Records**: Complete uptime statistics and latency tracking
-- **One-click Deployment**: Based on Cloudflare Workers, quick deployment
+- **Multi-platform Alerts**: Support for Telegram, Discord, Webhook and other notification methods
+- **Alert Throttling**: Intelligent anti-spam with 1-hour cooling period to avoid duplicate notifications
+- **Historical Records**: 50-record online status bar chart with real-time latency tracking
+- **Real-time Latency Monitoring**: Dynamic display of website response times with update animations
+- **In-place Editing**: Directly edit monitor items in the list without popups
+- **Smart Categorization & Accordion UI**: Support for custom grouping with collapsible sections
+- **Secure Authentication**: Modern password authentication system with local and session storage support, clears all authentication info after complete logout
+- **Modern Custom Modals**: Unified login and logout interface with elegant interaction experience
+- **Bilingual UI & Local Clock**: Chinese-English bilingual support with real-time local time display
+
+## 🚀 Quick Start
+
+### Live Demo
+- **🌐 Demo Site**: [View Demo](https://sentinel-demo.noxen.qzz.io/)
+- **Default Password**: `123456`
 
 ## 🚀 Quick Deployment
 
-### Step 1: Create Worker
+### One-click Deployment
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/your-username/sentinel)
+
+### Manual Deployment
+
+#### Step 1: Create Worker
 1. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com)
 2. Go to **Workers & Pages** → **Create Worker**
 3. Copy the `worker.js` code into the editor
@@ -39,8 +54,9 @@ Sentinel is a modern website monitoring system built on Cloudflare Workers, prov
 
 ## 📖 Detailed Usage Guide
 
-### 🔐 System Login
-When first accessing the Worker URL, the system will prompt for admin password. The password is saved in browser local storage for persistent login.
+### 🔐 Login and Logout System
+- **Login Interface**: When first accessing the Worker URL, the system displays a modern login modal prompting for the admin password. Supports password memory functionality with options to save to local storage or session storage.
+- **Logout Interface**: Clicking the logout button displays a modern modal with a consistent style to the login interface, providing clear confirmation options and operation instructions to prevent accidental actions. After logout, all stored authentication information is cleared.
 
 ### ➕ Adding Monitors
 1. **Single Addition**:
@@ -196,7 +212,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ---
 
-**🚀 Powered by Noxen YS & Manus AI**
+**🚀 Maintained by Noxen YS**
 
 ---
 

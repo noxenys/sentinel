@@ -157,6 +157,49 @@ const HTML_PAGE = `
     .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; color: #fff; }
     .modal-text { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.5; }
     .modal-btns { display: flex; gap: 12px; justify-content: center; }
+    
+    .login-modal { max-width: 380px; }
+    .login-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(to bottom right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .login-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .login-input { 
+      background: rgba(15, 23, 42, 0.8); 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      color: white; 
+      padding: 16px; 
+      font-family: inherit; 
+      width: 100%; 
+      font-size: 1rem;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+    .login-input:focus { 
+      outline: none; 
+      border-color: var(--primary); 
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); 
+    }
+    .login-btn { 
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      padding: 14px 28px; 
+      border-radius: 12px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.2s; 
+      font-size: 1rem; 
+      width: 100%;
+    }
+    .login-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .login-btn:active { transform: translateY(0); }
+    .login-error { 
+      color: var(--error); 
+      font-size: 0.85rem; 
+      margin-top: -10px; 
+      margin-bottom: 15px; 
+      text-align: center; 
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -204,6 +247,25 @@ const HTML_PAGE = `
     </div>
   </div>
 
+  <div id="loginOverlay" class="modal-overlay" style="display:none;">
+    <div class="modal login-modal">
+      <div class="login-title">🔐 Sentinel</div>
+      <div class="login-subtitle">请输入管理密码以继续 / Please enter admin password</div>
+      <input type="password" id="loginPassword" class="login-input" placeholder="密码 / Password" autocomplete="current-password">
+      <div style="display:flex; align-items:center; margin:15px 0;">
+        <input type="checkbox" id="rememberPassword" checked>
+        <label for="rememberPassword" style="margin-left:8px; font-size:0.9rem; color:var(--text-muted);">
+          记住密码 / Remember password
+        </label>
+      </div>
+      <div id="loginError" class="login-error">密码错误，请重新输入</div>
+      <button class="login-btn" onclick="handleLogin()">登录 / Login</button>
+      <div style="text-align:center; margin-top:20px; color:var(--text-muted); font-size:0.8rem;">
+        按 Enter 键快速登录 / Press Enter to login quickly
+      </div>
+    </div>
+  </div>
+
   <script>
     let allUrls = [];
     let historyData = {};
@@ -217,35 +279,125 @@ const HTML_PAGE = `
       return 'id-' + Math.abs(hash);
     }
 
-    async function apiFetch(path, options = {}) {
-      let password = localStorage.getItem('sentinel_pro_pass');
-      if (!password && path !== '/api/data') {
-        password = prompt('请输入管理密码 / Please enter admin password:');
-        if (password) localStorage.setItem('sentinel_pro_pass', password);
+    let loginResolve = null;
+    let loginReject = null;
+    
+    async function showLoginModal() {
+      return new Promise((resolve, reject) => {
+        loginResolve = resolve;
+        loginReject = reject;
+        document.getElementById('loginOverlay').style.display = 'flex';
+        setTimeout(() => document.getElementById('loginOverlay').classList.add('modal-active'), 10);
+        document.getElementById('loginPassword').focus();
+      });
+    }
+    
+    function hideLoginModal() {
+      document.getElementById('loginOverlay').classList.remove('modal-active');
+      setTimeout(() => {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginError').style.display = 'none';
+      }, 200);
+    }
+    
+    async function handleLogin() {
+      const password = document.getElementById('loginPassword').value;
+      const rememberPassword = document.getElementById('rememberPassword').checked;
+      
+      if (!password) {
+        document.getElementById('loginError').innerText = '请输入密码 / Please enter password';
+        document.getElementById('loginError').style.display = 'block';
+        return;
       }
+      
+      // 测试密码是否正确
+      const testRes = await fetch('/api/data', {
+        headers: { 'X-Password': password }
+      });
+      
+      if (testRes.status === 200) {
+        // 根据用户选择决定是否保存密码
+        if (rememberPassword) {
+          localStorage.setItem('sentinel_pro_pass', password);
+        } else {
+          // 不记住密码，使用sessionStorage（关闭浏览器后失效）
+          sessionStorage.setItem('sentinel_pro_pass', password);
+        }
+        hideLoginModal();
+        if (loginResolve) loginResolve(password);
+      } else {
+        document.getElementById('loginError').innerText = '密码错误，请重新输入 / Incorrect password';
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
+      }
+    }
+    
+    // 添加Enter键支持
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginInput = document.getElementById('loginPassword');
+      if (loginInput) {
+        loginInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            handleLogin();
+          }
+        });
+      }
+    });
+    
+    async function apiFetch(path, options = {}) {
+      // 检查localStorage和sessionStorage中的密码
+      let password = localStorage.getItem('sentinel_pro_pass') || sessionStorage.getItem('sentinel_pro_pass');
       options.headers = options.headers || {};
       options.headers['X-Password'] = password || '';
       const res = await fetch(path, options);
-      if (res.status === 401) {
-        localStorage.removeItem('sentinel_pro_pass');
-        const pass = prompt('密码错误，请重新输入 / Incorrect password:');
-        if (pass) {
-          localStorage.setItem('sentinel_pro_pass', pass);
-          return apiFetch(path, options);
-        }
-      }
       return res;
     }
 
-    async function init() {
-      try {
-        const res = await fetch('/api/data');
-        const data = await res.json();
-        allUrls = data.urls || [];
-        historyData = data.history || {};
-        render();
-        checkAll();
-      } catch (e) { console.error(e); }
+   async function init() {
+      // 1. 页面加载时，先检查本地有没有存密码
+      const savedPass = localStorage.getItem('sentinel_pro_pass') || sessionStorage.getItem('sentinel_pro_pass');
+      const loginOverlay = document.getElementById('loginOverlay');
+
+      if (savedPass) {
+        // 2. 如果有密码，尝试静默验证
+        try {
+          const res = await fetch('/api/data', { 
+            headers: { 'X-Password': savedPass } 
+          });
+
+          if (res.status === 200) {
+            // 3. 验证成功：直接隐藏弹窗，加载数据
+            if (loginOverlay) {
+                loginOverlay.style.display = 'none';
+                loginOverlay.classList.remove('modal-active');
+            }
+            
+            const data = await res.json();
+            allUrls = data.urls || [];
+            historyData = data.history || {};
+            render();
+            checkAll();
+            return; // 直接结束，不显示登录框
+          } 
+        } catch (e) {
+          console.error("Auto-login failed", e);
+        }
+        
+        // 如果代码走到这里，说明 verify 失败了（密码过期或错误），清除旧密码
+        localStorage.removeItem('sentinel_pro_pass');
+        sessionStorage.removeItem('sentinel_pro_pass');
+      }
+
+      // 4. 如果没密码或验证失败，显示登录框并等待用户输入
+      // 等待 showLoginModal 解析（即用户点击登录且成功后）
+      const newPass = await showLoginModal();
+      
+      // 登录成功后，再次调用 init 加载数据（此时 savedPass 逻辑会被跳过，因为已经拿到 newPass 了，或者递归调用会走缓存逻辑，但这里直接调 apiFetch 更简单，不过为了逻辑复用，重新 init 也可以）
+      if (newPass) {
+          init();
+      }
     }
 
     function render() {
@@ -504,7 +656,7 @@ const HTML_PAGE = `
       });
       if (res && res.ok) {
         showToast('修改成功 / Updated');
-        setTimeout(() => location.reload(), 800);
+        setTimeout(() => location.reload(), 300);
       }
     }
 
@@ -519,7 +671,7 @@ const HTML_PAGE = `
       const res = await apiFetch('/api/urls', { method: 'POST', body: JSON.stringify({ urls: urls }) });
       if (res && res.ok) {
         showToast('添加成功 / Added');
-        setTimeout(() => location.reload(), 800);
+        setTimeout(() => location.reload(), 300);
       }
     }
 
@@ -537,7 +689,7 @@ const HTML_PAGE = `
           });
           if (res && res.ok) {
             showToast('已删除 / Deleted');
-            setTimeout(() => location.reload(), 500);
+            setTimeout(() => location.reload(), 300);
           }
           closeModal();
         }
@@ -548,7 +700,10 @@ const HTML_PAGE = `
       document.getElementById('modalTitle').innerText = title;
       document.getElementById('modalText').innerText = text;
       const btn = document.getElementById('modalConfirmBtn');
-      btn.onclick = onConfirm;
+      btn.onclick = () => {
+        closeModal();
+        Promise.resolve().then(onConfirm);
+      };
       const overlay = document.getElementById('modalOverlay');
       overlay.style.display = 'flex';
       setTimeout(() => overlay.classList.add('modal-active'), 10);
@@ -574,10 +729,48 @@ const HTML_PAGE = `
     }
 
     function logout() {
-      if (confirm('确定要退出登录吗？\\nAre you sure?')) {
-        localStorage.removeItem('sentinel_pro_pass');
-        location.reload();
-      }
+      openLogoutModal();
+    }
+    
+    function openLogoutModal() {
+      const modalHtml = '<div id="logoutOverlay" class="modal-overlay" style="display:flex;">' +
+        '<div class="modal login-modal">' +
+          '<div class="login-title">🔓 Sentinel</div>' +
+          '<div class="login-subtitle">确定要退出登录吗？/ Are you sure you want to logout?</div>' +
+          '<div style="text-align:center; margin:20px 0; color:var(--text-muted); font-size:0.9rem;">' +
+            '退出后需要重新输入密码才能访问管理面板 / You will need to re-enter your password to access the admin panel' +
+          '</div>' +
+          '<div class="modal-btns">' +
+            '<button class="login-btn" style="background:#475569; margin-bottom:10px;" onclick="closeLogoutModal()">取消 / Cancel</button>' +
+            '<button class="login-btn btn-danger" onclick="confirmLogout()">退出 / Logout</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+      
+      // 创建临时容器并添加模态框
+      const tempContainer = document.createElement('div');
+      tempContainer.innerHTML = modalHtml;
+      document.body.appendChild(tempContainer.firstElementChild);
+      
+      // 添加动画效果
+      setTimeout(() => {
+        const overlay = document.getElementById('logoutOverlay');
+        if (overlay) overlay.classList.add('modal-active');
+      }, 10);
+    }
+    
+    function closeLogoutModal() {
+      const overlay = document.getElementById('logoutOverlay');
+      overlay.classList.remove('modal-active');
+      setTimeout(() => {
+        overlay.remove();
+      }, 200);
+    }
+    
+    function confirmLogout() {
+      localStorage.removeItem('sentinel_pro_pass');
+      sessionStorage.removeItem('sentinel_pro_pass');
+      location.reload();
     }
 
     function updateClock() {
@@ -618,6 +811,7 @@ async function handleRequest(request) {
   const checkAuth = (req) => req.headers.get('X-Password') === AUTH_PASSWORD;
 
   if (method === 'GET' && url.pathname === '/api/data') {
+    if (!checkAuth(request)) return new Response('Unauthorized', { status: 401 });
     const urls = await getUrls();
     const history = await getHistory();
     return new Response(JSON.stringify({ urls, history }), { headers: { 'Content-Type': 'application/json' } });
