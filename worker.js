@@ -21,25 +21,19 @@ const HTML_PAGE = `
       --primary: #6366f1;
       --primary-hover: #4f46e5;
       --bg: #0f172a;
-      /* 将卡片背景透明度从 0.7 降到 0.4，并稍微调亮色相 */
-      --card-bg: rgba(30, 41, 59, 0.4);
+      --card-bg: rgba(30, 41, 59, 0.7);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --success: #10b981;
       --error: #ef4444;
-      --border: rgba(255, 255, 255, 0.15); /* 稍微提亮边框，增加轮廓感 */
+      --border: rgba(255, 255, 255, 0.1);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
-      /* 调亮一点底色 */
-      background-color: #0f172a;
-      /* 核心：增加顶部中间的紫色光晕，以及左右的辅助光，模拟“极光”效果 */
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.25), transparent 50%), /* 顶部主光 */ 
-        radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.15), transparent 40%), /* 右上角紫光 */ 
-        radial-gradient(circle at 0% 100%, rgba(56, 189, 248, 0.1), transparent 40%); /* 左下角蓝光 */
-      background-attachment: fixed; /* 让背景固定，不随滚动条滚动 */
+      background-color: var(--bg);
+      background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent),
+                        radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.05), transparent);
       color: var(--text-main);
       line-height: 1.6;
       padding: 40px 20px;
@@ -59,32 +53,39 @@ const HTML_PAGE = `
     }
     
     /* 左侧：3个数据卡片网格 */
-    header {
-      position: relative;
-      text-align: center;
-      margin-bottom: 40px;
-      padding-top: 10px;
-    }
-    .logout-btn-top {
-      position: absolute;
-      top: 15px;
-      right: 0;
-      background: transparent;
-      border: none;
-      color: var(--error);
-      cursor: pointer;
-      opacity: 0.7;
-      transition: all 0.2s;
-      padding: 8px;
-    }
-    .logout-btn-top:hover { opacity: 1; transform: scale(1.1); }
-    
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr); /* 严格的3列 */
       gap: 20px;
       flex: 1; /* 占据剩余所有空间 */
     }
+
+    /* 右侧：独立的刷新按钮卡片 */
+    .refresh-btn-card {
+      width: 90px;
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-muted);
+      backdrop-filter: blur(16px);
+      text-align: center;
+      user-select: none;
+    }
+    .refresh-btn-card:hover {
+      background: rgba(99, 102, 241, 0.1);
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+    .refresh-btn-card:active { transform: translateY(0); }
+    .refresh-icon { font-size: 1.6rem; margin-bottom: 4px; line-height: 1; }
+    .refresh-text { font-size: 0.75rem; font-weight: 600; }
 
     /* 数据卡片样式 */
     .stat-card {
@@ -93,8 +94,7 @@ const HTML_PAGE = `
       border-radius: 20px;
       padding: 24px;
       text-align: center;
-      backdrop-filter: blur(20px); /* 加强毛玻璃 */
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); /* 增加投影 */
+      backdrop-filter: blur(16px);
       transition: all 0.3s ease;
       /* 移除点击刷新功能，防止误触 */
     }
@@ -106,6 +106,13 @@ const HTML_PAGE = `
     @media (max-width: 768px) {
       .dashboard-row { flex-direction: column; }
       .stats-grid { grid-template-columns: repeat(3, 1fr); } 
+      .refresh-btn-card { 
+        width: 100%; 
+        height: 50px; 
+        flex-direction: row; 
+        gap: 10px;
+      }
+      .refresh-icon { margin-bottom: 0; font-size: 1.2rem; }
     }
     /* ------------------------ */
 
@@ -167,8 +174,8 @@ const HTML_PAGE = `
       display: grid; 
       /* 强制桌面端显示3列，卡片更紧凑 */ 
       grid-template-columns: repeat(3, 1fr); 
-      gap: 12px; 
-      margin-top: 12px; 
+      gap: 16px; 
+      margin-top: 16px; 
     } 
     /* 手机端保持1列 */ 
     @media (max-width: 768px) { 
@@ -177,18 +184,17 @@ const HTML_PAGE = `
     .group-collapsed .group-content { display: none; }
 
     .monitor-item { 
-      background: var(--card-bg); /* 使用通透背景 */
-      border: 1px solid var(--border); 
+      background: rgba(30, 41, 59, 0.95); /* 提高不透明度，增加实体感 */ 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
       border-radius: 12px; 
-      padding: 14px; 
-      backdrop-filter: blur(20px); /* 加强毛玻璃 */
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); /* 增加投影 */
+      padding: 16px; 
+      /* 加上轻微的投影，模仿参考图的浮动感 */ 
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
       display: flex; 
       flex-direction: column; 
       justify-content: space-between; 
-      min-height: auto; 
+      min-height: 110px; /* 固定最小高度，确保整齐 */ 
       transition: all 0.3s ease;
-      position: relative; /* 关键：为悬浮按钮提供定位基准 */
     } 
     .monitor-item:hover { 
       transform: translateY(-3px); 
@@ -201,56 +207,16 @@ const HTML_PAGE = `
     }
     .monitor-item.offline:hover { border-color: var(--error); }
     
-    /* 新的布局结构 */
-    .monitor-main {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      margin-bottom: 8px;
-    }
-
-    .monitor-info {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-width: 0;
-      padding-right: 12px;
-    }
-
-    .monitor-title-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 2px;
-    }
-
-    .url-title { 
-      font-size: 1rem; 
-      font-weight: 700; 
-      color: #fff; 
-      white-space: nowrap; 
-      overflow: hidden; 
-      text-overflow: ellipsis; 
-    }
-
-    .btn-copy-mini {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0.6;
-      transition: all 0.2s;
-    }
-    .btn-copy-mini:hover {
-      color: var(--primary);
-      opacity: 1;
-      transform: scale(1.1);
-    }
+    .monitor-header { 
+      margin-bottom: 8px; 
+      /* 让标题和状态分列左右 */ 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: flex-start; 
+    } 
+    
+    .url-info { flex: 1; padding-right: 10px; min-width: 0; } /* 防止文字撞到状态标 */ 
+    .url-title { font-size: 1rem; font-weight: 700; margin-bottom: 2px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .url-path {
       font-size: 0.8rem;
@@ -259,88 +225,58 @@ const HTML_PAGE = `
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
-      -webkit-line-clamp: 1; /* 只显示一行 */
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
     }
-
-    .monitor-status {
+    .domain-info {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    
+    .status-info {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       gap: 4px;
-      min-width: fit-content;
+      min-width: 80px;
     }
-    
     .status-badge { 
-      font-size: 0.75rem; 
-      padding: 4px 10px; 
-      border-radius: 8px; 
+      font-size: 0.6rem; 
+      padding: 3px 8px; 
+      border-radius: 6px; 
       font-weight: 700; 
       text-transform: uppercase; 
       width: fit-content;
-      line-height: 1;
     }
-    .status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); }
-    .status-offline { background: rgba(239, 68, 68, 0.15); color: var(--error); }
-    .status-checking { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
-
+    .status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-offline { background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .status-info-text {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      opacity: 0.8;
+      line-height: 1.3;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
     .latency { 
       font-size: 0.7rem; 
       color: #38bdf8; 
       font-family: monospace; 
+      transition: all 0.3s ease; 
       font-weight: 600; 
     }
-    
-    /* 悬浮操作按钮 */
-    .hover-actions {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      display: flex;
-      gap: 4px;
-      opacity: 0;
-      transform: translateX(10px);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      pointer-events: none; /* 默认不可点击 */
-      z-index: 10;
-      background: rgba(15, 23, 42, 0.9);
-      border-radius: 8px;
-      padding: 2px;
-      border: 1px solid var(--border);
-      backdrop-filter: blur(4px);
-    }
-    
-    .monitor-item:hover .hover-actions {
-      opacity: 1;
-      transform: translateX(0);
-      pointer-events: auto;
-    }
-    
-    .btn-action-mini {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-action-mini:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-    }
-    .btn-action-mini.delete:hover {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--error);
-    }
+    .latency-update { color: #fff; text-shadow: 0 0 8px var(--primary); }
 
-    /* 旧样式清理 */
-    .monitor-header, .actions, .url-info, .status-info, .domain-info, .status-info-text {
-      display: none; 
+    .actions { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center;
+      justify-content: flex-end;
+      margin-top: 8px;
     }
     .btn {
       background: var(--primary);
@@ -426,51 +362,7 @@ const HTML_PAGE = `
       .actions { justify-content: flex-start; }
     }
 
-    .admin-container { margin-top: 50px; }
-    .admin-toggle-btn {
-      width: 100%;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 15px;
-      color: var(--text-muted);
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .admin-toggle-btn:hover {
-      background: rgba(99, 102, 241, 0.1);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-    .admin-panel { 
-      background: var(--card-bg); 
-      border: 1px solid var(--border); 
-      border-radius: 20px; 
-      padding: 30px; 
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      opacity: 1;
-      transform: translateY(0);
-      margin-top: 20px;
-      max-height: 1000px;
-    }
-    .admin-panel.collapsed {
-      padding: 0;
-      border: none;
-      max-height: 0;
-      opacity: 0;
-      margin-top: 0;
-      transform: translateY(-10px);
-      pointer-events: none;
-    }
+    .admin-panel { margin-top: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
     .input-group { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
     .input-field {
       background: rgba(15, 23, 42, 0.6);
@@ -587,14 +479,7 @@ const HTML_PAGE = `
     <header>
       <h1>Sentinel</h1>
       <p class="subtitle">智能在线哨兵 · 生产级监控</p>
-      <button class="logout-btn-top" onclick="logout()" title="退出登录 / Logout">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-      </button>
-      <div id="liveClock" style="margin-top: 5px; font-family: monospace; color: var(--primary); font-weight: 600; font-size: 1.1rem; letter-spacing: 1px;"></div>
+      <div id="liveClock" style="margin-top: 15px; font-family: monospace; color: var(--primary); font-weight: 600; font-size: 1.1rem; letter-spacing: 1px;"></div>
     </header>
 
     <div class="dashboard-row">
@@ -612,24 +497,27 @@ const HTML_PAGE = `
           <div class="stat-value" style="color:var(--error)" id="offlineCount">0</div>
         </div>
       </div>
+
+      <div class="refresh-btn-card" onclick="manualRefresh()" title="立即刷新">
+        <div class="refresh-icon">⟳</div>
+        <div class="refresh-text">刷新</div>
+      </div>
     </div>
 
     <div id="monitorList"></div>
 
-    <div class="admin-container">
-      <div class="admin-toggle-btn" onclick="toggleAdminPanel()">
-        <span id="adminToggleText">+ 添加新监控 / Add New Monitor</span>
+    <div class="admin-panel">
+      <h3 style="margin-bottom:20px; font-weight:700;">管理面板 / Admin Panel</h3>
+      <div class="input-group">
+        <input type="text" id="groupName" class="input-field" placeholder="分类名称 / Group Name (e.g. Production, Personal)">
+        <textarea id="newUrls" class="input-field" style="min-height: 100px;" placeholder="输入 URL，每行一个 / Enter URLs, one per line"></textarea>
       </div>
-      <div class="admin-panel collapsed" id="adminPanel">
-        <h3 style="margin-bottom:20px; font-weight:700;">管理面板 / Admin Panel</h3>
-        <div class="input-group">
-          <input type="text" id="groupName" class="input-field" placeholder="分类名称 / Group Name (e.g. Production, Personal)">
-          <textarea id="newUrls" class="input-field" style="min-height: 100px;" placeholder="输入 URL，每行一个 / Enter URLs, one per line"></textarea>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; gap:12px;">
+          <button class="btn" id="addBtn" onclick="addUrls()">批量添加 / Add</button>
+          <button class="btn" style="background:#475569" onclick="exportConfig()">导出 / Export</button>
         </div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-             <button class="btn" id="addBtn" onclick="addUrls()">批量添加 / Add</button>
-             <button class="btn" style="background:#475569" onclick="exportConfig()">导出 / Export</button>
-          </div>
+        <button class="btn btn-danger" onclick="logout()">退出 / Logout</button>
       </div>
     </div>
   </div>
@@ -921,40 +809,39 @@ const HTML_PAGE = `
 
           itemsHtml += \`
             <div class="monitor-item" id="item-\${itemId}">
-              <div class="hover-actions">
-                <button class="btn-action-mini" onclick="editUrl('\${item.raw.replace(/'/g, "\\\\'")}')" title="编辑">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </button>
-                <button class="btn-action-mini delete" onclick="deleteUrl('\${item.raw.replace(/'/g, "\\\\'")}')" title="删除">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path></svg>
-                </button>
-              </div>
-
-              <div class="monitor-main">
-                <div class="monitor-info">
-                  <div class="monitor-title-row">
-                    <div class="url-title" title="\${item.url}">\${domain}</div>
-                    <button class="btn-copy-mini" onclick="copyUrl('\${item.url}')" title="复制">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    </button>
-                  </div>
-                  \${(displayUrl === domain || displayUrl === domain + '/') ? '' : \`<div class="url-path" title="\${item.url}">\${displayUrl}</div>\`}
+              <div class="monitor-header">
+                <div class="url-info">
+                  <div class="url-title" title="\${item.url}">\${domain}</div>
+                  <div class="url-path" title="\${item.url}">\${displayUrl}</div>
                 </div>
-                <div class="monitor-status">
-                  <span id="status-\${itemId}" class="status-badge status-checking">Checking</span>
+                <div class="status-info">
+                  <span id="status-\${itemId}" class="status-badge status-checking">检测中...</span>
                   <span id="latency-\${itemId}" class="latency"></span>
                 </div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-icon" onclick="copyUrl('\${item.url}')" title="复制">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+                <button class="btn btn-icon" onclick="editUrl('\${item.raw.replace(/'/g, "\\\\'")}')" title="编辑">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="btn btn-icon" onclick="deleteUrl('\${item.raw.replace(/'/g, "\\\\'")}')" title="删除" style="color:#ef4444; border-color:rgba(239,68,68,0.2);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2-2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                </button>
               </div>
               <div class="history-bar">\${dotsHtml}</div>
             </div>
           \`;
         });
         
-        // 智能折叠：有异常自动展开，全正常默认折叠
-        const isCollapsed = !hasOffline;
-
         html += \`
-          <div class="group-container\${isCollapsed ? ' group-collapsed' : ''}\${hasOffline ? ' has-offline' : ''}" id="group-\${groupId}">
+          <div class="group-container" id="group-\${groupId}\${hasOffline ? ' has-offline' : ''}">
             <div class="group-header\${hasOffline ? ' has-offline' : ''}" onclick="toggleGroup('\${groupId}')">
               <div class="group-title" id="group-title-\${groupId}">
                 <svg class="group-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
@@ -1003,38 +890,40 @@ const HTML_PAGE = `
             const data = await res.json();
             const latency = Date.now() - start;
             
-            // 1. 清理旧的错误文字元素（如果有的话）
-            const oldErrorText = document.getElementById('status-info-' + itemId);
-            if (oldErrorText) oldErrorText.remove();
-
             if (badge) {
               if (data.ok) {
                 badge.innerText = 'ONLINE ' + data.status;
                 badge.className = 'status-badge status-online';
-                badge.title = 'Service is online'; // 统一加 title
-                
                 latEl.innerText = latency + 'ms';
-                latEl.style.opacity = '1';
                 latEl.classList.add('latency-update');
                 setTimeout(() => { latEl.classList.remove('latency-update'); }, 500);
                 
                 // 记录状态为在线
                 window.itemStatuses[itemId] = 'online';
+
+                // 移除可能存在的错误信息
+                const statusInfoEl = document.getElementById('status-info-' + itemId);
+                if (statusInfoEl) {
+                  statusInfoEl.remove();
+                }
               } else {
                 const statusCode = data.status || 'ERR';
                 badge.innerText = 'OFFLINE ' + statusCode;
                 badge.className = 'status-badge status-offline';
 
-                // 添加状态码解释到 title 属性
+                // 添加状态码解释
                 const statusExplain = getStatusExplanation(statusCode);
-                // 核心修改：错误信息只进 title，不进 DOM
-                badge.title = statusExplain;
+                const statusInfoEl = document.getElementById('status-info-' + itemId);
+                if (!statusInfoEl) {
+                  const infoEl = document.createElement('div');
+                  infoEl.id = 'status-info-' + itemId;
+                  infoEl.className = 'status-info-text';
+                  infoEl.innerText = statusExplain;
+                  badge.parentNode.appendChild(infoEl);
+                } else {
+                  statusInfoEl.innerText = statusExplain;
+                }
                 
-                // 关键修复：不要删除或隐藏 latency 元素，而是填入占位符，保持高度一致
-                latEl.innerText = '---';
-                latEl.style.opacity = '0.5'; // 让它变暗，表示无效
-                latEl.className = 'latency'; // 确保样式类名一致
-
                 // 记录状态为异常
                 window.itemStatuses[itemId] = 'offline';
               }
@@ -1042,15 +931,6 @@ const HTML_PAGE = `
           } catch (e) { 
             // 记录状态为异常
             window.itemStatuses[itemId] = 'offline';
-            if (badge) {
-               badge.innerText = 'ERROR';
-               badge.className = 'status-badge status-offline';
-               badge.title = '连接失败 / Connection Failed';
-               // 关键修复：保持高度一致
-               latEl.innerText = '---';
-               latEl.style.opacity = '0.5';
-               latEl.className = 'latency';
-            }
           }
           
           // 更新统计显示（基于所有监控项的状态）
@@ -1063,10 +943,10 @@ const HTML_PAGE = `
       // 并行检查所有URL
       await Promise.all(allUrls.map(item => checkOne(item)));
 
-      // 设置统一轮询，每60秒刷新一次所有URL (保护Cloudflare免费额度)
+      // 设置统一轮询，每30秒刷新一次所有URL
       checkAllTimer = setInterval(async () => {
         await Promise.all(allUrls.map(item => checkOne(item)));
-      }, 60000);
+      }, 30000);
     }
 
     // 添加手动刷新按钮功能
@@ -1509,11 +1389,6 @@ const HTML_PAGE = `
           }, 2000);
         }
       }
-    }
-
-    function toggleAdminPanel() {
-      const panel = document.getElementById('adminPanel');
-      panel.classList.toggle('collapsed');
     }
 
     // 启动初始化

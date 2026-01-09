@@ -1,0 +1,31 @@
+{
+  "name": "sentinel-monitoring",
+  "version": "3.7.0",
+  "description": "A modern website monitoring system built on Cloudflare Workers",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "monitoring",
+    "cloudflare-workers",
+    "website-monitoring",
+    "alert-system",
+    "serverless"
+  ],
+  "author": "Noxen YS",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/sentinel.git"
+  },
+  "homepage": "https://github.com/your-username/sentinel#readme"
+}

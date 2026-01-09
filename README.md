@@ -127,7 +127,12 @@ sentinel/
 ├── worker.js          # 主程序文件 / Main program file
 ├── README.md          # 项目主文档 / Main project documentation
 ├── README_zh.md       # 中文文档 / Chinese documentation
-└── README_en.md       # 英文文档 / English documentation
+├── README_en.md       # 英文文档 / English documentation
+├── wrangler.toml      # Cloudflare Workers 配置 / Cloudflare Workers configuration
+├── package.json       # 项目依赖配置 / Project dependencies configuration
+├── LICENSE           # 许可证文件 / License file
+├── CONTRIBUTING.md   # 贡献指南 / Contributing guide
+└── .gitignore        # Git 忽略文件 / Git ignore file
 ```
 
 ## 🤝 贡献 / Contributing

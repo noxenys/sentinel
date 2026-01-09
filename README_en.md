@@ -183,7 +183,12 @@ sentinel/
 ├── worker.js          # Main program file
 ├── README.md          # Main project documentation
 ├── README_zh.md       # Chinese documentation
-└── README_en.md       # English documentation
+├── README_en.md       # English documentation
+├── wrangler.toml      # Cloudflare Workers configuration
+├── package.json       # Project dependencies configuration
+├── LICENSE           # License file
+├── CONTRIBUTING.md   # Contributing guide
+└── .gitignore        # Git ignore file
 ```
 
 ### API Endpoints

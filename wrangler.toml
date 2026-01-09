@@ -2,20 +2,23 @@ name = "sentinel"
 main = "worker.js"
 compatibility_date = "2026-01-01"
 
+# 环境变量配置
 [env.production.vars]
-# 设置你的环境变量
-# PASSWORD = "你的管理员密码"
-# TELEGRAM_TOKEN = "你的Telegram机器人令牌"
-# CHAT_ID = "你的Telegram聊天ID"
+PASSWORD = "123456"
+# TELEGRAM_TOKEN = "your-telegram-bot-token"
+# CHAT_ID = "your-telegram-chat-id"
+# DISCORD_WEBHOOK = "your-discord-webhook-url"
+# GENERIC_WEBHOOK = "your-generic-webhook-url"
 
-# KV存储命名空间
+# KV存储命名空间（部署时自动创建）
 [[kv_namespaces]]
 binding = "SENTINEL_KV"
-id = "YOUR_KV_NAMESPACE_ID"
-# preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
+id = ""  # 部署时自动生成
 
-# 可选：D1数据库（如果需要）
-# [[d1_databases]]
-# binding = "SENTINEL_DB"
-# database_name = "sentinel-db"
-# database_id = "你的D1数据库ID"
+# Cron触发器配置
+[triggers]
+crons = ["*/10 * * * *"]
+
+# 兼容性标志
+[compatibility_flags]
+nodejs_compat = true

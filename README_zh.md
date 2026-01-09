@@ -182,7 +182,12 @@ sentinel/
 ├── worker.js          # 主程序文件
 ├── README.md          # 项目主文档
 ├── README_zh.md       # 中文文档
-└── README_en.md       # 英文文档
+├── README_en.md       # 英文文档
+├── wrangler.toml      # Cloudflare Workers 配置
+├── package.json       # 项目依赖配置
+├── LICENSE           # 许可证文件
+├── CONTRIBUTING.md   # 贡献指南
+└── .gitignore        # Git 忽略文件
 ```
 
 ### API 接口
