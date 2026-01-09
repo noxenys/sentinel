@@ -6,7 +6,6 @@ Sentinel v3.7 In-place Edition is a modern website monitoring system built on Cl
 
 - **Multi-platform Alerts**: Support for Telegram, Discord, Webhook and other notification methods
 - **Alert Throttling**: Intelligent anti-spam with 1-hour cooling period to avoid duplicate notifications
-- **Historical Records**: 50-record online status bar chart with real-time latency tracking
 - **Real-time Latency Monitoring**: Dynamic display of website response times with update animations
 - **In-place Editing**: Directly edit monitor items in the list without popups
 - **Smart Categorization & Accordion UI**: Support for custom grouping with collapsible sections
@@ -149,7 +148,7 @@ In Worker's **Settings** → **Variables** → **Environment Variables**, add:
 ### Feature Set
 - Real-time monitoring and latency measurement
 - Multi-platform alerts (Telegram, Discord, Webhook)
-- Smart status categorization and history records
+- Smart status categorization
 - Batch operations and configuration export
 - Status code explanation and error diagnosis
 
@@ -159,7 +158,7 @@ The system uses Cloudflare Workers' Cron triggers for scheduled monitoring, chec
 
 1. **Scheduled Triggering**: Monitors scheduled events through `addEventListener('scheduled')`
 2. **Concurrent Detection**: Uses `Promise.all` to check all websites in parallel for efficiency
-3. **Status Recording**: Maintains the last 50 check results for each website to generate historical charts
+3. **Status Recording**: Maintains the last 50 check results for each website for backend data analysis
 4. **Smart Alerts**: Sends notifications only on status changes with a 1-hour cooldown to prevent spam
 
 ## 🔧 Development Guide
@@ -195,7 +194,7 @@ sentinel/
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/data` | GET | Get monitoring data and historical records |
+| `/api/data` | GET | Get monitoring data |
 | `/api/urls` | POST | Add/update monitor URL |
 | `/api/urls` | DELETE | Delete monitor URL |
 | `/api/check` | GET | Check single URL status |
@@ -219,7 +218,7 @@ A: Clear browser cache or reset password.
 ### Performance Optimization
 - Set appropriate detection frequency
 - Use category management for large number of monitors
-- Regularly clean historical data
+- Regularly clean monitoring data
 
 ## 🤝 Contributing Guide
 

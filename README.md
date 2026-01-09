@@ -10,7 +10,6 @@
 
 - **多平台告警** / **Multi-platform Alerts**: 支持 Telegram、Discord、Webhook 等多种通知方式 / Support for Telegram, Discord, Webhook and other notification methods
 - **告警限流** / **Alert Throttling**: 智能防骚扰，1小时冷却时间避免重复通知 / Intelligent anti-spam with 1-hour cooling period to avoid duplicate notifications
-- **历史记录** / **Historical Records**: 50条记录的在线状态条形图，实时延迟跟踪 / 50-record online status bar chart with real-time latency tracking
 - **实时延迟监控** / **Real-time Latency Monitoring**: 动态显示网站响应时间，带更新动画效果 / Dynamic display of website response times with update animations
 - **就地编辑** / **In-place Editing**: 直接在列表中编辑监控项，无需弹窗 / Directly edit monitor items in the list without popups
 - **智能分类与手风琴UI** / **Smart Categorization & Accordion UI**: 支持自定义分组，可折叠展开 / Support for custom grouping with collapsible sections
@@ -117,7 +116,7 @@
 - **功能** / **Features**: 
   - 实时监控与延迟测量
   - 多平台告警（Telegram、Discord、Webhook）
-  - 智能状态分类与历史记录
+  - 智能状态分类
   - 批量操作与配置导出
   - 状态码解释与错误诊断
 
