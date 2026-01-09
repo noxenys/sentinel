@@ -149,9 +149,12 @@ sentinel/
 **🚀 由 Noxen YS 维护**  
 **🚀 Maintained by Noxen YS**
 
-*项目开始: 2026年1月5日*  
+*项目开始: 2026年1月7日*  
 *项目最后更新: 2026年1月9日*  
-*Project Started: January 5, 2026*  
+*Project Started: January 7, 2026*  
 *Last Updated: January 9, 2026*
+
+**版本: v3.7**  
+**Version: v3.7**
 
 </div>

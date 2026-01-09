@@ -13,9 +13,7 @@ const HTML_PAGE = `
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sentinel | Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --primary: #6366f1;
@@ -30,7 +28,7 @@ const HTML_PAGE = `
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
       background-color: var(--bg);
       background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent),
                         radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.05), transparent);
@@ -40,81 +38,64 @@ const HTML_PAGE = `
       min-height: 100vh;
     }
     .container { max-width: 900px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 40px; }
+    header { 
+      position: relative; 
+      text-align: center; 
+      margin-bottom: 40px; 
+    }
     h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.05em; margin-bottom: 8px; background: linear-gradient(to bottom right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .subtitle { color: var(--text-muted); font-size: 1rem; font-weight: 500; }
-    
-    /* --- 仪表盘核心布局修正 --- */
-    .dashboard-row {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 30px;
-      align-items: stretch; /* 让高度对齐 */
-    }
-    
-    /* 左侧：3个数据卡片网格 */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr); /* 严格的3列 */
-      gap: 20px;
-      flex: 1; /* 占据剩余所有空间 */
-    }
-
-    /* 右侧：独立的刷新按钮卡片 */
-    .refresh-btn-card {
-      width: 90px;
-      background: rgba(30, 41, 59, 0.4);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .logout-btn-top {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 8px;
+      color: var(--error);
       cursor: pointer;
       transition: all 0.3s ease;
-      color: var(--text-muted);
-      backdrop-filter: blur(16px);
-      text-align: center;
-      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .refresh-btn-card:hover {
-      background: rgba(99, 102, 241, 0.1);
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-2px);
+    .logout-btn-top:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--error);
+      transform: translateY(-1px);
     }
-    .refresh-btn-card:active { transform: translateY(0); }
-    .refresh-icon { font-size: 1.6rem; margin-bottom: 4px; line-height: 1; }
-    .refresh-text { font-size: 0.75rem; font-weight: 600; }
+    
+    /* 数据卡片网格布局 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
 
     /* 数据卡片样式 */
     .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 24px;
+      background: rgba(30, 41, 59, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 18px;
       text-align: center;
       backdrop-filter: blur(16px);
       transition: all 0.3s ease;
-      /* 移除点击刷新功能，防止误触 */
     }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    .stat-card:hover {
+      background: rgba(30, 41, 59, 0.5);
+      border-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
     .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; font-weight: 600; }
     .stat-value { font-size: 2rem; font-weight: 800; }
 
-    /* 手机端适配：垂直排列 */
+    /* 手机端适配 */
     @media (max-width: 768px) {
-      .dashboard-row { flex-direction: column; }
-      .stats-grid { grid-template-columns: repeat(3, 1fr); } 
-      .refresh-btn-card { 
-        width: 100%; 
-        height: 50px; 
-        flex-direction: row; 
-        gap: 10px;
-      }
-      .refresh-icon { margin-bottom: 0; font-size: 1.2rem; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
     }
-    /* ------------------------ */
 
     .group-container { margin-bottom: 24px; }
     
@@ -123,19 +104,19 @@ const HTML_PAGE = `
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 4px;       /* 减小内边距，紧凑一点 */
-      background: transparent; /* 核心：去掉深色背景 */
+      padding: 10px 4px;       /* 减小内边距，更紧凑 */
+      background: transparent; 
       border: none;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 只留一条淡淡的底线 */
-      border-radius: 0;        /* 去掉圆角 */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* 更淡的底线 */
+      border-radius: 0;        
       cursor: pointer;
       user-select: none;
-      margin-bottom: 12px;     /* 稍微拉开和下面卡片的距离 */
+      margin-bottom: 10px;     /* 减小间距 */
       transition: all 0.2s;
     }
     .group-header:hover { 
-      padding-left: 10px;      /* 悬停时轻微右移，增加交互感 */
-      border-bottom-color: var(--primary); /* 线条变色 */
+      padding-left: 8px;      /* 更小的悬停偏移 */
+      border-bottom-color: rgba(255, 255, 255, 0.1); /* 更淡的悬停颜色 */
     }
     
     /* 标题文字 */
@@ -172,10 +153,12 @@ const HTML_PAGE = `
     .group-collapsed .group-arrow { transform: rotate(-90deg); }
     .group-content { 
       display: grid; 
-      /* 强制桌面端显示3列，卡片更紧凑 */ 
-      grid-template-columns: repeat(3, 1fr); 
+      /* 修复横向溢出：使用自适应网格布局 */ 
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
       gap: 16px; 
       margin-top: 16px; 
+      width: 100%;
+      box-sizing: border-box;
     } 
     /* 手机端保持1列 */ 
     @media (max-width: 768px) { 
@@ -184,26 +167,26 @@ const HTML_PAGE = `
     .group-collapsed .group-content { display: none; }
 
     .monitor-item { 
-      background: rgba(30, 41, 59, 0.95); /* 提高不透明度，增加实体感 */ 
-      border: 1px solid rgba(255, 255, 255, 0.08); 
-      border-radius: 12px; 
-      padding: 16px; 
-      /* 加上轻微的投影，模仿参考图的浮动感 */ 
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+      background: rgba(30, 41, 59, 0.7); /* 降低不透明度，更安静 */ 
+      border: 1px solid rgba(255, 255, 255, 0.05); 
+      border-radius: 10px; 
+      padding: 14px; 
+      box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05); 
       display: flex; 
       flex-direction: column; 
       justify-content: space-between; 
-      min-height: 110px; /* 固定最小高度，确保整齐 */ 
+      min-height: 100px; /* 稍微降低高度 */ 
       transition: all 0.3s ease;
     } 
     .monitor-item:hover { 
-      transform: translateY(-3px); 
-      border-color: var(--primary); 
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); 
+      transform: translateY(-1px); 
+      border-color: rgba(255, 255, 255, 0.1); 
+      box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1); 
     }
     .monitor-item.offline { 
-      border-color: rgba(239, 68, 68, 0.3);
-      background: rgba(239, 68, 68, 0.05);
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.1);
+      box-shadow: 0 2px 8px -1px rgba(239, 68, 68, 0.2);
     }
     .monitor-item.offline:hover { border-color: var(--error); }
     
@@ -215,12 +198,12 @@ const HTML_PAGE = `
       align-items: flex-start; 
     } 
     
-    .url-info { flex: 1; padding-right: 10px; min-width: 0; } /* 防止文字撞到状态标 */ 
-    .url-title { font-size: 1rem; font-weight: 700; margin-bottom: 2px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .url-info { flex: 1; padding-right: 10px; min-width: 0; overflow: hidden; } /* 防止文字撞到状态标 */ 
+    .url-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; color: rgba(255, 255, 255, 0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .url-path {
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
       word-break: break-all;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -248,9 +231,20 @@ const HTML_PAGE = `
       font-weight: 700; 
       text-transform: uppercase; 
       width: fit-content;
+      transition: all 0.3s ease;
     }
-    .status-online { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
-    .status-offline { background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .status-online { 
+      background: rgba(16, 185, 129, 0.08); 
+      color: rgba(16, 185, 129, 0.6); 
+      border: 1px solid rgba(16, 185, 129, 0.1); 
+      opacity: 0.7;
+    }
+    .status-offline { 
+      background: rgba(239, 68, 68, 0.2); 
+      color: var(--error); 
+      border: 1px solid rgba(239, 68, 68, 0.3); 
+      opacity: 1;
+    }
     .status-info-text {
       font-size: 0.65rem;
       color: var(--text-muted);
@@ -263,13 +257,14 @@ const HTML_PAGE = `
       margin-top: 2px;
     }
     .latency { 
-      font-size: 0.7rem; 
-      color: #38bdf8; 
+      font-size: 0.65rem; 
+      color: rgba(56, 189, 248, 0.6); 
       font-family: monospace; 
       transition: all 0.3s ease; 
-      font-weight: 600; 
+      font-weight: 500; 
+      opacity: 0.7;
     }
-    .latency-update { color: #fff; text-shadow: 0 0 8px var(--primary); }
+    .latency-update { color: rgba(255, 255, 255, 0.9); text-shadow: 0 0 4px rgba(56, 189, 248, 0.3); }
 
     .actions { 
       display: flex; 
@@ -292,22 +287,25 @@ const HTML_PAGE = `
     }
     .btn:hover { background: var(--primary-hover); }
     .btn-icon { 
-      background: rgba(255,255,255,0.05); 
-      color: var(--text-muted); 
+      background: rgba(255,255,255,0.02); 
+      color: rgba(255, 255, 255, 0.3); 
       padding: 6px; 
-      border: 1px solid var(--border); 
-      width: 32px;
-      height: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.05); 
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
-      transition: all 0.2s ease;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      opacity: 0.5;
     }
     .btn-icon:hover { 
-      background: rgba(255,255,255,0.1); 
+      background: rgba(255,255,255,0.08); 
       border-color: var(--primary); 
+      color: rgba(255, 255, 255, 0.8);
       transform: translateY(-1px); 
+      opacity: 1;
     }
     .btn-danger { 
       background: rgba(239, 68, 68, 0.1); 
@@ -362,7 +360,48 @@ const HTML_PAGE = `
       .actions { justify-content: flex-start; }
     }
 
-    .admin-panel { margin-top: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
+    /* 底部触发按钮样式 */
+    .btn-add-monitor {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border); /* Changed from dashed to solid */
+      border-radius: 20px;
+      padding: 15px;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      backdrop-filter: blur(20px); /* Restored glassy effect */
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 40px;
+    }
+    .btn-add-monitor:hover {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    /* 管理面板容器（默认隐藏） */
+    .admin-panel-wrapper {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .admin-panel-wrapper.open {
+      max-height: 600px; /* 展开高度 */
+      opacity: 1;
+      margin-top: 20px;
+    }
+    
+    .admin-panel { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
     .input-group { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
     .input-field {
       background: rgba(15, 23, 42, 0.6);
@@ -479,45 +518,48 @@ const HTML_PAGE = `
     <header>
       <h1>Sentinel</h1>
       <p class="subtitle">智能在线哨兵 · 生产级监控</p>
+      <button class="logout-btn-top" onclick="logout()" title="退出登录 / Logout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </button>
       <div id="liveClock" style="margin-top: 15px; font-family: monospace; color: var(--primary); font-weight: 600; font-size: 1.1rem; letter-spacing: 1px;"></div>
     </header>
 
-    <div class="dashboard-row">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">总监控</div>
-          <div class="stat-value" id="totalCount">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">在线</div>
-          <div class="stat-value" style="color:var(--success)" id="onlineCount">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">异常</div>
-          <div class="stat-value" style="color:var(--error)" id="offlineCount">0</div>
-        </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">总监控</div>
+        <div class="stat-value" id="totalCount">0</div>
       </div>
-
-      <div class="refresh-btn-card" onclick="manualRefresh()" title="立即刷新">
-        <div class="refresh-icon">⟳</div>
-        <div class="refresh-text">刷新</div>
+      <div class="stat-card">
+        <div class="stat-label">在线</div>
+        <div class="stat-value" style="color:var(--success)" id="onlineCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">异常</div>
+        <div class="stat-value" style="color:var(--error)" id="offlineCount">0</div>
       </div>
     </div>
 
     <div id="monitorList"></div>
 
-    <div class="admin-panel">
-      <h3 style="margin-bottom:20px; font-weight:700;">管理面板 / Admin Panel</h3>
-      <div class="input-group">
-        <input type="text" id="groupName" class="input-field" placeholder="分类名称 / Group Name (e.g. Production, Personal)">
-        <textarea id="newUrls" class="input-field" style="min-height: 100px;" placeholder="输入 URL，每行一个 / Enter URLs, one per line"></textarea>
-      </div>
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; gap:12px;">
+    <button id="toggleAdminBtn" class="btn-add-monitor" onclick="toggleAdmin()">
+      + 添加新监控 / Add New Monitor
+    </button>
+    
+    <div class="admin-panel-wrapper" id="adminContainer">
+      <div class="admin-panel">
+        <h3 style="margin-bottom:20px; font-weight:700;">管理面板 / Admin Panel</h3>
+        <div class="input-group">
+          <input type="text" id="groupName" class="input-field" placeholder="分类名称 / Group Name (e.g. Production, Personal)">
+          <textarea id="newUrls" class="input-field" style="min-height: 100px;" placeholder="输入 URL，每行一个 / Enter URLs, one per line"></textarea>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
           <button class="btn" id="addBtn" onclick="addUrls()">批量添加 / Add</button>
           <button class="btn" style="background:#475569" onclick="exportConfig()">导出 / Export</button>
         </div>
-        <button class="btn btn-danger" onclick="logout()">退出 / Logout</button>
       </div>
     </div>
   </div>
@@ -1295,6 +1337,21 @@ const HTML_PAGE = `
 
     function logout() {
       openLogoutModal();
+    }
+    
+    function toggleAdmin() {
+      const container = document.getElementById('adminContainer');
+      const btn = document.getElementById('toggleAdminBtn');
+      container.classList.toggle('open');
+      
+      // 简单的文字切换反馈
+      if (container.classList.contains('open')) {
+        btn.innerText = "× 关闭面板 / Close Panel";
+        btn.style.borderColor = "var(--primary)";
+      } else {
+        btn.innerText = "+ 添加新监控 / Add New Monitor";
+        btn.style.borderColor = "";
+      }
     }
     
     function openLogoutModal() {
