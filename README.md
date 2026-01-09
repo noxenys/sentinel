@@ -76,11 +76,8 @@
 | `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
 | `GENERIC_WEBHOOK` | 通用 Webhook URL | ❌ | - |
 
-**步骤 4: 配置定时任务 (Cron Triggers)**
-1. 在 Worker 设置中进入 **Triggers** → **Cron Triggers**
-2. 添加新的 Cron 触发器:
-   - **推荐设置**: `*/10 * * * *` (每10分钟检查一次)
-   - **高级设置**: 根据监控数量调整频率
+4. **配置定时任务** / **Configure Cron Trigger**: 推荐 `*/10 * * * *` (每10分钟 / Every 10 mins)
+> ⚠️ 免费版请注意请求额度，详情见文档 / Note free tier limits, see docs for details.
 
 **步骤 5: 部署和测试**
 1. 点击 **Save and Deploy**

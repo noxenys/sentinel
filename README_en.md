@@ -70,11 +70,18 @@ In Worker's **Settings** → **Variables** → **Environment Variables**, add:
 | `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
 | `GENERIC_WEBHOOK` | Generic Webhook URL | ❌ | - |
 
-**Step 4: Configure Scheduled Tasks (Cron Triggers)**
-1. In Worker settings, go to **Triggers** → **Cron Triggers**
-2. Add new Cron trigger:
-   - **Recommended**: `*/10 * * * *` (Every 10 minutes)
-   - **Advanced**: Adjust frequency based on monitor count
+### Step 4: Configure Scheduled Tasks (Cron Triggers)
+To enable background monitoring and failure alerts, you must configure Cron Triggers. The Worker runs at this frequency even if the web page is closed.
+Choose a frequency based on your **monitor count** and **Cloudflare plan**:
+| Plan | Cron Expression | Description | Use Case |
+| :--- | :--- | :--- | :--- |
+| **🛡️ Recommended** | `*/10 * * * *` | **Every 10 mins** | **Most users**. Safe for 50+ monitors. |
+| **🚀 Turbo Mode** | `* * * * *` | **Every 1 min** | **< 20 monitors only**. Fastest response, higher usage. |
+| **🐢 Power Saver** | `*/30 * * * *` | **Every 30 mins** | For massive non-critical monitors. |
+> **⚠️ Traffic Warning (Cloudflare Free Tier)**
+> Free Tier limit: **100,000 requests/day**.
+> * **Formula**: `Monitor Count` × `1440` (if 1 min interval) = Daily Requests
+> * **Example**: **20 monitors** at **1 min interval** = `28,800` requests/day (Safe). If you have >60 monitors, decrease frequency to 10 mins to avoid hitting limits.
 
 **Step 5: Deploy and Test**
 1. Click **Save and Deploy**
