@@ -38,7 +38,7 @@
 
 #### 🚀 一键部署 (推荐) / One-click Deployment (Recommended)
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/noxenys/Sentinel)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/noxenys/sentinel)
 
 **一键部署流程**:
 1. **点击上方按钮** → 登录您的 Cloudflare 账户

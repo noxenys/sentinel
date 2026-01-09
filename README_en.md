@@ -32,7 +32,7 @@ Sentinel v3.7 In-place Edition is a modern website monitoring system built on Cl
 
 #### One-click Deployment (Recommended)
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/noxenys/Sentinel)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/noxenys/sentinel)
 
 **One-click Deployment Process**:
 1. **Click the button above** → Log in to your Cloudflare account
