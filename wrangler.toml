@@ -10,10 +10,9 @@ compatibility_date = "2026-01-01"
 # GENERIC_WEBHOOK = "your-generic-webhook-url"
 
 # KV存储命名空间
-# 注意：如果是首次部署，请在 Cloudflare Dashboard 中手动创建 KV 并绑定，或者填入创建后的 ID
-# [[kv_namespaces]]
-# binding = "SENTINEL_KV"
-# id = ""  # 请填入您的 KV ID，例如 "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# 使用 Wrangler 自动创建和绑定 KV（首次 deploy 时会自动在账户下创建命名空间）
+[[kv_namespaces]]
+binding = "SENTINEL_KV"
 
 # Cron触发器配置
 [triggers]
