@@ -105,7 +105,12 @@ This repository includes a GitHub Actions workflow `.github/workflows/deploy.yml
 1. In your GitHub repository, go to **Settings → Secrets and variables → Actions** and add:
    - `CF_API_TOKEN`
    - `CF_ACCOUNT_ID`
-2. On every push to the `main` branch, the workflow runs `wrangler deploy` to publish the latest code to Cloudflare Workers.
+2. When creating `CF_API_TOKEN` in Cloudflare, grant at least these permissions on the target account:
+   - **Workers Scripts**: Edit
+   - **Workers KV Storage**: Edit (if you use KV)
+3. On every push to the `main` branch, the workflow runs `wrangler deploy` to publish the latest code to Cloudflare Workers.
+
+> ⚠️ Note: When using GitHub Actions with `wrangler deploy`, any environment variables or secrets you edit manually in the Cloudflare Dashboard for this Worker will be overwritten on the next deploy. Treat GitHub Secrets / CI configuration as the single source of truth and avoid managing the same variables directly in the Dashboard.
 
 ## 📖 Detailed Usage Guide
 

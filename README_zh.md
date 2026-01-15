@@ -104,7 +104,12 @@ Sentinel 提供暗色科技风的仪表盘界面，包含：
 1. 在 GitHub 仓库 **Settings → Secrets and variables → Actions** 中添加：
    - `CF_API_TOKEN`
    - `CF_ACCOUNT_ID`
-2. 每次 push 到 `main` 分支时，自动执行 `wrangler deploy` 将最新代码部署到 Cloudflare Workers。
+2. 在 Cloudflare 中创建 `CF_API_TOKEN` 时，至少需要为对应账户授予：
+   - **Workers 脚本 (Workers Scripts)**: 编辑（Edit）
+   - **Workers KV 存储 (Workers KV Storage)**: 编辑（Edit）（如果你使用 KV）
+3. 每次 push 到 `main` 分支时，自动执行 `wrangler deploy` 将最新代码部署到 Cloudflare Workers。
+
+> ⚠️ 注意：如果启用了 GitHub Actions + `wrangler deploy` 自动部署，Cloudflare 控制台中手动修改的环境变量和机密会在下一次部署时被覆盖。请以 GitHub Secrets / CI 配置为唯一来源，不要同时在 Dashboard 中手动维护同一批变量。
 
 ## 📖 详细使用指南
 
