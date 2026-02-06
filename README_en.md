@@ -69,14 +69,14 @@ In Worker's **Settings** → **Variables** → **Environment Variables**, add:
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
-| `PASSWORD` | Admin panel password | ✅ | `123456` (recommend to change) |
+| `PASSWORD` | Admin panel password | ✅ | *(required, no default)* |
 | `TELEGRAM_TOKEN` | Telegram Bot Token | ❌ | - |
 | `CHAT_ID` | Telegram Chat ID | ❌ | - |
 | `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
 | `GENERIC_WEBHOOK` | Generic Webhook URL | ❌ | - |
 
 > 🔒 **Security Note**  
-> Sentinel uses `123456` as development default password. **Change to a strong random password for production use**.
+> Sentinel has no built-in default admin password. Set a strong random value for `PASSWORD` before first login.
 >
 > It is recommended to configure `PASSWORD` as an environment variable in the Cloudflare Worker Dashboard and avoid putting real passwords into `wrangler.toml`.
 
@@ -106,6 +106,7 @@ This repository includes a GitHub Actions workflow `.github/workflows/deploy.yml
    - `CF_API_TOKEN`
    - `CF_ACCOUNT_ID`
    - `CF_KV_NAMESPACE_ID` (the ID of `SENTINEL_KV`)
+   - `PASSWORD`
 2. When creating `CF_API_TOKEN` in Cloudflare, grant at least these permissions on the target account:
    - **Workers Scripts**: Edit
    - **Workers KV Storage**: Edit (if you use KV)
@@ -298,3 +299,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 *Project Started: January 7, 2026*  
 *Last Updated: January 15, 2026*
+

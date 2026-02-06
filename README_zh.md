@@ -22,7 +22,7 @@ Sentinel v3.8 就地编辑版是一个基于 Cloudflare Workers 构建的现代�
 
 ### 在线演示
 - **🌐 演示站点**: [点击查看演示](https://sentinel-demo.noxen.qzz.io/)
-- **登录密码**: 在环境变量 `PASSWORD` 中配置（默认：`123456`，生产环境请修改）
+- **登录密码**: 在环境变量 `PASSWORD` 中配置（无内置默认值）
 
 ## 🖼 界面预览
 
@@ -68,14 +68,14 @@ Sentinel 提供暗色科技风的仪表盘界面，包含：
 
 | 变量名 | 描述 | 必需 | 默认值 |
 |--------|------|------|--------|
-| `PASSWORD` | 管理面板密码 | ✅ | `123456` (建议修改) |
+| `PASSWORD` | 管理面板密码 | ✅ | *(必填，无默认值)* |
 | `TELEGRAM_TOKEN` | Telegram 机器人令牌 | ❌ | - |
 | `CHAT_ID` | Telegram 聊天ID | ❌ | - |
 | `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
 | `GENERIC_WEBHOOK` | 通用 Webhook URL | ❌ | - |
 
 > 🔒 **安全提示**  
-> Sentinel 使用 `123456` 作为开发默认密码。**生产环境请务必修改为强随机密码**并妥善保管。
+> Sentinel 无内置默认密码。请在首次登录前为 `PASSWORD` 设置强随机值并妥善保管。
 >
 > 建议在 Cloudflare Dashboard 的 Worker 环境变量中配置 `PASSWORD`，不要在 `wrangler.toml` 中写入真实密码。
 
@@ -105,6 +105,7 @@ Sentinel 提供暗色科技风的仪表盘界面，包含：
    - `CF_API_TOKEN`
    - `CF_ACCOUNT_ID`
    - `CF_KV_NAMESPACE_ID`（`SENTINEL_KV` 的命名空间 ID）
+   - `PASSWORD`
 2. 在 Cloudflare 中创建 `CF_API_TOKEN` 时，至少需要为对应账户授予：
    - **Workers 脚本 (Workers Scripts)**: 编辑（Edit）
    - **Workers KV 存储 (Workers KV Storage)**: 编辑（Edit）（如果你使用 KV）
@@ -297,3 +298,4 @@ A: 清除浏览器缓存或重新设置密码。
 
 *项目开始: 2026年1月7日*  
 *项目最后更新: 2026年1月15日*
+
