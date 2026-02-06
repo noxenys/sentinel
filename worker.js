@@ -25,13 +25,18 @@ const HTML_PAGE = `
       --success: #22c55e;
       --error: #f97373;
       --border: rgba(148, 163, 184, 0.2);
+      --clock: #93a9d1;
+      --group-divider: rgba(148, 163, 184, 0.16);
+      --group-divider-hover: rgba(148, 163, 184, 0.3);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
       background-color: var(--bg);
-      background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent),
-                        radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.05), transparent);
+      background-image:
+        linear-gradient(125deg, rgba(4, 10, 28, 0.97) 0%, rgba(2, 6, 23, 0.96) 48%, rgba(7, 18, 43, 0.97) 100%),
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 42%),
+        radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.08), transparent 45%);
       color: var(--text-main);
       line-height: 1.6;
       padding: 40px 20px;
@@ -45,6 +50,15 @@ const HTML_PAGE = `
     }
     h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.05em; margin-bottom: 8px; background: linear-gradient(to bottom right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .subtitle { color: var(--text-muted); font-size: 1rem; font-weight: 500; }
+    .live-clock {
+      margin-top: 15px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      color: var(--clock);
+      font-weight: 600;
+      font-size: 1.05rem;
+      letter-spacing: 0.8px;
+      text-shadow: 0 0 10px rgba(96, 165, 250, 0.2);
+    }
     .logout-btn-top {
       position: absolute;
       top: 0;
@@ -107,7 +121,7 @@ const HTML_PAGE = `
       padding: 10px 4px;       /* 减小内边距，更紧凑 */
       background: transparent; 
       border: none;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* 更淡的底线 */
+      border-bottom: 1px solid var(--group-divider); /* 更淡的底线 */
       border-radius: 0;        
       cursor: pointer;
       user-select: none;
@@ -116,7 +130,8 @@ const HTML_PAGE = `
     }
     .group-header:hover { 
       padding-left: 8px;      /* 更小的悬停偏移 */
-      border-bottom-color: rgba(255, 255, 255, 0.1); /* 更淡的悬停颜色 */
+      border-bottom-color: var(--group-divider-hover); /* 更淡的悬停颜色 */
+      background: rgba(15, 23, 42, 0.2);
     }
     
     /* 标题文字 */
@@ -525,7 +540,7 @@ const HTML_PAGE = `
           <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
       </button>
-      <div id="liveClock" style="margin-top: 15px; font-family: monospace; color: var(--primary); font-weight: 600; font-size: 1.1rem; letter-spacing: 1px;"></div>
+      <div id="liveClock" class="live-clock"></div>
     </header>
 
     <div class="stats-grid">
@@ -683,6 +698,11 @@ const HTML_PAGE = `
         }
         hideLoginModal();
         if (loginResolve) loginResolve(password);
+      } else if (testRes.status === 503) {
+        document.getElementById('loginError').innerText = 'Server misconfigured: PASSWORD env var is missing';
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
       } else {
         document.getElementById('loginError').innerText = '密码错误，请重新输入 / Incorrect password';
         document.getElementById('loginError').style.display = 'block';
@@ -931,7 +951,7 @@ const HTML_PAGE = `
         const runCheck = async () => {
           const start = Date.now();
           try {
-            const res = await fetch('/api/check?url=' + encodeURIComponent(url));
+            const res = await apiFetch('/api/check?url=' + encodeURIComponent(url));
             const data = await res.json();
             const latency = Date.now() - start;
             
@@ -1471,17 +1491,95 @@ addEventListener('scheduled', event => {
   event.waitUntil(handleScheduled());
 });
 
+const CHECK_TIMEOUT_MS = 10000;
+const SCHEDULED_CONCURRENCY = 8;
+
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+function getAuthPassword() {
+  const password = typeof PASSWORD === 'string' ? PASSWORD.trim() : '';
+  // 防止使用默认弱密码，要求必须配置环境变量
+  if (password === '123456' || password === '') {
+    console.warn('Security warning: Using default or empty password is not recommended');
+  }
+  return password;
+}
+
+function extractTargetUrl(raw) {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.includes(':http')) return trimmed.substring(trimmed.indexOf(':http') + 1).trim();
+  return trimmed;
+}
+
+function normalizeTargetUrl(raw) {
+  const candidate = extractTargetUrl(raw);
+  if (!candidate) return null;
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+    return parsed.toString();
+  } catch (e) {
+    return null;
+  }
+}
+
+function isTimeoutError(error) {
+  if (!error) return false;
+  if (error.name === 'AbortError') return true;
+  const msg = typeof error.message === 'string' ? error.message.toLowerCase() : '';
+  return msg.includes('abort') || msg.includes('timeout');
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = CHECK_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function mapWithConcurrency(items, limit, workerFn) {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  const concurrency = Math.max(1, Math.min(limit, items.length));
+
+  const runner = async () => {
+    while (true) {
+      const current = nextIndex++;
+      if (current >= items.length) break;
+      results[current] = await workerFn(items[current], current);
+    }
+  };
+
+  await Promise.all(Array.from({ length: concurrency }, () => runner()));
+  return results;
+}
+
 async function handleRequest(request) {
   const url = new URL(request.url);
   const method = request.method;
-  const AUTH_PASSWORD = typeof PASSWORD !== 'undefined' ? PASSWORD : '123456';
-  const checkAuth = (req) => req.headers.get('X-Password') === AUTH_PASSWORD;
+  const AUTH_PASSWORD = getAuthPassword();
+  const checkAuth = (req) => AUTH_PASSWORD.length > 0 && req.headers.get('X-Password') === AUTH_PASSWORD;
+
+  if (url.pathname.startsWith('/api/') && AUTH_PASSWORD.length === 0) {
+    return jsonResponse({ ok: false, error: 'PASSWORD env var is not configured' }, 503);
+  }
 
   if (method === 'GET' && url.pathname === '/api/data') {
     if (!checkAuth(request)) return new Response('Unauthorized', { status: 401 });
     const urls = await getUrls();
     const history = await getHistory();
-    return new Response(JSON.stringify({ urls, history }), { headers: { 'Content-Type': 'application/json' } });
+    return jsonResponse({ urls, history });
   }
 
   if (method === 'POST' && url.pathname === '/api/urls') {
@@ -1503,7 +1601,7 @@ async function handleRequest(request) {
     }
     const updatedUrls = newUrls.length > 0 ? [...new Set([...currentUrls, ...newUrls])] : currentUrls;
     await saveUrls(updatedUrls);
-    return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+    return jsonResponse({ ok: true });
   }
 
   if (method === 'DELETE' && url.pathname === '/api/urls') {
@@ -1521,25 +1619,23 @@ async function handleRequest(request) {
     let currentUrls = await getUrls();
     const updatedUrls = currentUrls.filter(u => u !== delUrl);
     await saveUrls(updatedUrls);
-    return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+    return jsonResponse({ ok: true });
   }
 
   if (method === 'GET' && url.pathname === '/api/check') {
-    const target = url.searchParams.get('url');
+    if (!checkAuth(request)) return new Response('Unauthorized', { status: 401 });
+    const target = normalizeTargetUrl(url.searchParams.get('url'));
+    if (!target) return jsonResponse({ ok: false, status: 'INVALID_URL' }, 400);
     try {
       // 增加超时控制和更宽松的协议处理，确保带端口的 URL 也能正常检测
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      const res = await fetch(target, { 
-        method: 'GET', 
-        headers: { 'User-Agent': 'Sentinel/3.8' }, 
-        redirect: 'follow',
-        signal: controller.signal
+      const res = await fetchWithTimeout(target, {
+        method: 'GET',
+        headers: { 'User-Agent': 'Sentinel/3.8' },
+        redirect: 'follow'
       });
-      clearTimeout(timeoutId);
-      return new Response(JSON.stringify({ ok: res.status < 400, status: res.status }));
+      return jsonResponse({ ok: res.status < 400, status: res.status });
     } catch (e) {
-      return new Response(JSON.stringify({ ok: false, status: e.message === 'Request aborted' ? 'TIMEOUT' : 'ERR' }));
+      return jsonResponse({ ok: false, status: isTimeoutError(e) ? 'TIMEOUT' : 'ERR' });
     }
   }
 
@@ -1580,24 +1676,33 @@ async function handleScheduled() {
   const DISCORD_URL = typeof DISCORD_WEBHOOK !== 'undefined' ? DISCORD_WEBHOOK : '';
   const GENERIC_URL = typeof GENERIC_WEBHOOK !== 'undefined' ? GENERIC_WEBHOOK : '';
 
-  let results = [];
-  await Promise.all(urls.map(async (raw) => {
-    let url = raw;
-    if (raw.includes(':http')) url = raw.substring(raw.indexOf(':http') + 1);
-    try {
-      const res = await fetch(url, { method: 'GET', headers: { 'User-Agent': 'Sentinel/3.8' } });
-      const ok = res.status < 400;
-      results.push({ raw, url, ok, status: res.status });
-      if (!history[raw]) history[raw] = [];
-      history[raw].push(ok ? 1 : 0);
-      if (history[raw].length > 50) history[raw].shift();
-    } catch (e) {
-      results.push({ raw, url, ok: false, status: 'Error' });
-      if (!history[raw]) history[raw] = [];
+  const results = await mapWithConcurrency(urls, SCHEDULED_CONCURRENCY, async (raw) => {
+    const target = normalizeTargetUrl(raw);
+    const normalizedUrl = target || String(raw);
+    if (!history[raw]) history[raw] = [];
+
+    if (!target) {
       history[raw].push(0);
       if (history[raw].length > 50) history[raw].shift();
+      return { raw, url: normalizedUrl, ok: false, status: 'INVALID_URL' };
     }
-  }));
+
+    try {
+      const res = await fetchWithTimeout(target, {
+        method: 'GET',
+        headers: { 'User-Agent': 'Sentinel/3.8' },
+        redirect: 'follow'
+      }, 15000); // 15秒超时
+      const ok = res.status < 400;
+      history[raw].push(ok ? 1 : 0);
+      if (history[raw].length > 50) history[raw].shift();
+      return { raw, url: normalizedUrl, ok, status: res.status };
+    } catch (e) {
+      history[raw].push(0);
+      if (history[raw].length > 50) history[raw].shift();
+      return { raw, url: normalizedUrl, ok: false, status: isTimeoutError(e) ? 'TIMEOUT' : 'Error' };
+    }
+  });
 
   await SENTINEL_KV.put('history', JSON.stringify(history));
 
@@ -1618,7 +1723,14 @@ async function handleScheduled() {
       if (TG_TOKEN && TG_CHAT) promises.push(sendTG(TG_TOKEN, TG_CHAT, msg));
       if (DISCORD_URL) promises.push(sendDiscord(DISCORD_URL, msg));
       if (GENERIC_URL) promises.push(sendGeneric(GENERIC_URL, msg));
-      await Promise.all(promises);
+      
+      // 使用 Promise.allSettled 避免单个通知失败影响整体
+      const results = await Promise.allSettled(promises);
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.warn(`Notification ${index} failed:`, result.reason);
+        }
+      });
       await SENTINEL_KV.put('alert_status', JSON.stringify(alertStatus));
     }
   }

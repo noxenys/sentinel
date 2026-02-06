@@ -23,7 +23,7 @@ Sentinel v3.8 In-place Edition is a modern website monitoring system built on Cl
 
 ### Live Demo
 - **🌐 Demo Site**: [View Demo](https://sentinel-demo.noxen.qzz.io/)
-- **Default Password**: `123456`
+- **Password**: Set it via the `PASSWORD` environment variable (no built-in default)
 
 ## 🖼 UI Preview
 
@@ -69,14 +69,14 @@ In Worker's **Settings** → **Variables** → **Environment Variables**, add:
 
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
-| `PASSWORD` | Admin panel password | ✅ | `123456` |
+| `PASSWORD` | Admin panel password | ✅ | `123456` (recommend to change) |
 | `TELEGRAM_TOKEN` | Telegram Bot Token | ❌ | - |
 | `CHAT_ID` | Telegram Chat ID | ❌ | - |
 | `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
 | `GENERIC_WEBHOOK` | Generic Webhook URL | ❌ | - |
 
 > 🔒 **Security Note**  
-> When deploying to production, always change the default password `123456` to a strong, random password and keep it safe. Do not use the default password long-term on any public endpoint.
+> Sentinel uses `123456` as development default password. **Change to a strong random password for production use**.
 >
 > It is recommended to configure `PASSWORD` as an environment variable in the Cloudflare Worker Dashboard and avoid putting real passwords into `wrangler.toml`.
 
@@ -96,7 +96,7 @@ Choose a frequency based on your **monitor count** and **Cloudflare plan**:
 **Step 5: Deploy and Test**
 1. Click **Save and Deploy**
 2. Visit your Worker URL to test functionality
-3. Use default password `123456` to log in
+3. Log in with the value you configured in `PASSWORD`
 
 ### CI/CD Deployment (Optional)
 
@@ -207,7 +207,7 @@ npm install
 npm run dev
 ```
 
-> ℹ️ It is recommended to use Node.js **v16 or later** for local development to avoid runtime incompatibilities.
+> ℹ️ It is recommended to use Node.js **v20 or later** for local development to avoid runtime incompatibilities.
 
 ### Code Structure
 ```

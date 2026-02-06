@@ -47,7 +47,7 @@
 
 ### 在线演示 / Live Demo
 - **🌐 演示站点**: [点击查看演示](https://sentinel-demo.noxen.qzz.io/) / [View Demo](https://sentinel-demo.noxen.qzz.io/)
-- **默认密码**: `123456` / **Default Password**: `123456`
+- **密码 / Password**: 在环境变量 `PASSWORD` 中配置（无内置默认值） / Set via `PASSWORD` env var (no built-in default)
 
 <a id="ui-preview"></a>
 
@@ -105,14 +105,14 @@ Visit the live demo above to see the full dashboard UI.
 
 | 变量名 | 描述 | 必需 | 默认值 |
 |--------|------|------|--------|
-| `PASSWORD` | 管理面板密码 | ✅ | `123456` |
+| `PASSWORD` | 管理面板密码 | ✅ | *(required, no default)* |
 | `TELEGRAM_TOKEN` | Telegram 机器人令牌 | ❌ | - |
 | `CHAT_ID` | Telegram 聊天ID | ❌ | - |
 | `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
 | `GENERIC_WEBHOOK` | 通用 Webhook URL | ❌ | - |
 
 > 🔒 **安全提示 / Security Note**  
-> 部署到生产环境时，请务必将默认密码 `123456` 修改为随机、强度足够的密码，并妥善保存。切勿在公开环境中长期使用默认密码。
+> Sentinel 无内置默认密码。请在首次登录前为 `PASSWORD` 设置强随机值。 / Sentinel has no built-in default password. Set a strong random value for `PASSWORD` before first login.
 
 4. **配置定时任务** / **Configure Cron Trigger**: 推荐 `*/10 * * * *` (每10分钟 / Every 10 mins)
 > ⚠️ 免费版请注意请求额度，详情见文档 / Note free tier limits, see docs for details.
@@ -120,7 +120,7 @@ Visit the live demo above to see the full dashboard UI.
 **步骤 5: 部署和测试**
 1. 点击 **Save and Deploy**
 2. 访问您的 Worker URL 测试功能
-3. 使用默认密码 `123456` 登录
+3. 使用 `PASSWORD` 配置值登录 / Log in with your configured `PASSWORD` value
 
 <a id="docs"></a>
 

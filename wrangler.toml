@@ -13,10 +13,9 @@ compatibility_date = "2026-01-01"
 # 使用 Wrangler 自动创建和绑定 KV（首次 deploy 时会自动在账户下创建命名空间）
 [[kv_namespaces]]
 binding = "SENTINEL_KV"
+# Replace with your real KV namespace id before deployment.
+id = "00000000000000000000000000000000"
 
 # Cron触发器配置
 [triggers]
 crons = ["*/10 * * * *"]
-
-# 兼容性标志
-compatibility_flags = ["nodejs_compat"]

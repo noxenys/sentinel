@@ -22,7 +22,7 @@ Sentinel v3.8 就地编辑版是一个基于 Cloudflare Workers 构建的现代�
 
 ### 在线演示
 - **🌐 演示站点**: [点击查看演示](https://sentinel-demo.noxen.qzz.io/)
-- **默认密码**: `123456`
+- **登录密码**: 在环境变量 `PASSWORD` 中配置（默认：`123456`，生产环境请修改）
 
 ## 🖼 界面预览
 
@@ -68,14 +68,14 @@ Sentinel 提供暗色科技风的仪表盘界面，包含：
 
 | 变量名 | 描述 | 必需 | 默认值 |
 |--------|------|------|--------|
-| `PASSWORD` | 管理面板密码 | ✅ | `123456` |
+| `PASSWORD` | 管理面板密码 | ✅ | `123456` (建议修改) |
 | `TELEGRAM_TOKEN` | Telegram 机器人令牌 | ❌ | - |
 | `CHAT_ID` | Telegram 聊天ID | ❌ | - |
 | `DISCORD_WEBHOOK` | Discord Webhook URL | ❌ | - |
 | `GENERIC_WEBHOOK` | 通用 Webhook URL | ❌ | - |
 
 > 🔒 **安全提示**  
-> 部署到生产环境时，请务必将默认密码 `123456` 修改为随机、强度足够的密码，并妥善保存。不要在公网环境长时间使用默认密码。
+> Sentinel 使用 `123456` 作为开发默认密码。**生产环境请务必修改为强随机密码**并妥善保管。
 >
 > 建议在 Cloudflare Dashboard 的 Worker 环境变量中配置 `PASSWORD`，不要在 `wrangler.toml` 中写入真实密码。
 
@@ -95,7 +95,7 @@ Sentinel 提供暗色科技风的仪表盘界面，包含：
 **步骤 5: 部署和测试**
 1. 点击 **Save and Deploy**
 2. 访问您的 Worker URL 测试功能
-3. 使用默认密码 `123456` 登录
+3. 使用你在 `PASSWORD` 中配置的值登录
 
 ### CI/CD 自动部署（可选）
 
@@ -206,7 +206,7 @@ npm install
 npm run dev
 ```
 
-> ℹ️ 开发环境建议使用 Node.js **16 或以上版本**，以避免因运行时不兼容导致的异常。
+> ℹ️ 开发环境建议使用 Node.js **20 或以上版本**，以避免因运行时不兼容导致的异常。
 
 ### 代码结构
 ```
