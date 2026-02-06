@@ -105,6 +105,7 @@ This repository includes a GitHub Actions workflow `.github/workflows/deploy.yml
 1. In your GitHub repository, go to **Settings → Secrets and variables → Actions** and add:
    - `CF_API_TOKEN`
    - `CF_ACCOUNT_ID`
+   - `CF_KV_NAMESPACE_ID` (the ID of `SENTINEL_KV`)
 2. When creating `CF_API_TOKEN` in Cloudflare, grant at least these permissions on the target account:
    - **Workers Scripts**: Edit
    - **Workers KV Storage**: Edit (if you use KV)

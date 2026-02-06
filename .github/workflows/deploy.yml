@@ -16,6 +16,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Inject KV namespace ID
+        env:
+          CF_KV_NAMESPACE_ID: ${{ secrets.CF_KV_NAMESPACE_ID }}
+        run: |
+          if [ -z "$CF_KV_NAMESPACE_ID" ]; then
+            echo "::error::Missing required secret: CF_KV_NAMESPACE_ID"
+            exit 1
+          fi
+          sed -i "s/00000000000000000000000000000000/$CF_KV_NAMESPACE_ID/g" wrangler.toml
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         env:
@@ -24,6 +34,6 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: deploy
-          wranglerVersion: "4.59.1"
+          wranglerVersion: "4.63.0"
           secrets: |
             PASSWORD

@@ -104,6 +104,7 @@ Sentinel 提供暗色科技风的仪表盘界面，包含：
 1. 在 GitHub 仓库 **Settings → Secrets and variables → Actions** 中添加：
    - `CF_API_TOKEN`
    - `CF_ACCOUNT_ID`
+   - `CF_KV_NAMESPACE_ID`（`SENTINEL_KV` 的命名空间 ID）
 2. 在 Cloudflare 中创建 `CF_API_TOKEN` 时，至少需要为对应账户授予：
    - **Workers 脚本 (Workers Scripts)**: 编辑（Edit）
    - **Workers KV 存储 (Workers KV Storage)**: 编辑（Edit）（如果你使用 KV）
